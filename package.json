@@ -1,6 +1,6 @@
 {
   "name": "@metko/meeting-calendar",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Calendar",
   "main": "index.js",
   "scripts": {
