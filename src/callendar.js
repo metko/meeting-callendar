@@ -14,19 +14,19 @@ module.exports = class CallendarEvent {
             disableEmptyDetails: false, // disable showing empty date details
             events: [{...settings.events}], // List of event
             onInit: function (calendar) {}, // Callback after first initialization
-            onMonthChange: function (month, year) {}, // Callback on month change
-            onDateSelect: function (date, events) {}, // Callback on date selection
+            onAnimationMonthChange: function (month, year) {}, // Callback on month change
+            onDateSelect: function (calendar, date, events) {}, // Callback on date selection
             onEventSelect: function () {},              // Callback fired when an event is selected     - see $(this).data('event')
             onEventCreate: function( $el ) {},          // Callback fired when an HTML event is created - see $(this).data('event')
-            onDayCreate:   function( $el, d, m, y ) {}  // Callback fired when an HTML day is created   - see $(this).data('today'), .data('todayEvents')
-        };
+            onDayCreate:   function( $el, d, m, y ) {},  // Callback fired when an HTML day is created   - see $(this).data('today'), .data('todayEvents')
+            onMonthChange: function( calendar, start, end, y ) {} // callback if you want to put some events
+          };
         this.settings = { ...this.defaults, ...settings} // merge des options
       
         this.element = element
         this.currentDate = new Date();
         this.isChanging = false // if the slider is cuyrrently changing
-
-        console.log(this)
+        
         this.init();
       
     }
@@ -56,11 +56,40 @@ module.exports = class CallendarEvent {
         calendar.append(calendarcontent)
         //this.buildCalendar(todayDate, calendar);
         container.append(calendar);
-    
+       
         this.bindEvents();
         this.settings.onInit(this);
-    }  
-    
+    }
+
+    setEvents(events) {
+      var that = this
+      this.events = events
+      events.forEach(event => {
+        let date = new Date(event.date)
+        let dayElement = that.element.querySelector('table.new .day.day-'+date.getDate())
+        if(dayElement) {
+          dayElement.classList.add('has-event')
+        }
+      })
+    }
+
+    getDayName(index) {
+      return this.settings.days[index]
+    }
+
+    getMonthName(index) {
+      return this.settings.months[index]
+    }
+
+    fullDateString(date) {
+      return {
+         day: this.getDayName(date.getDay()),
+         month: this.getMonthName(date.getMonth()),
+         year: date.getFullYear(),
+         d: date.getDate()
+      }
+    }
+
      //Update the current month header
     updateHeader(date, header) {
         var monthText = this.settings.months[date.getMonth()];
@@ -82,9 +111,12 @@ module.exports = class CallendarEvent {
         //set current year and month
         var y = fromDate.getFullYear(), m = fromDate.getMonth();
         //set first day of the month
-        var firstDay = new Date(y, m, 1);
+        var originalFirstDay = new Date(y, m, 1);
+        var firstDay = new Date(originalFirstDay);
+       
         //set last day of the month
-        var lastDay = new Date(y, m + 1, 0);
+        var orinalLastDay = new Date(y, m + 1, 0);
+        var lastDay = new Date(orinalLastDay);
         //set  start day of weeks
         var startDayOfWeek = firstDay.getDay();
   
@@ -96,6 +128,7 @@ module.exports = class CallendarEvent {
           while (firstDay.getDay() !== startDayOfWeek) {
             firstDay.setDate(firstDay.getDate() - 1);
           }
+       
           // If last day of month is different of startDayOfWeek + 7
           while (lastDay.getDay() !== ((startDayOfWeek + 7) % 7)) {
             lastDay.setDate(lastDay.getDate() + 1);
@@ -109,15 +142,15 @@ module.exports = class CallendarEvent {
           thead.append(td);
         }
 
-  
         //For firstDay to lastDay
         for (var day = firstDay; day <= lastDay; day.setDate(day.getDate())) {
+      
          var tr = document.createElement('tr')
           //For each row
           for (var i = 0; i < 7; i++) {
+            console.log('dfd')
             var td = document.createElement('td')
-            td.innerHTML = '<div class="day" data-date="' + day.toISOString() + '">' + day.getDate() + '</div>';
-  
+            td.innerHTML = '<div class="day day-'+day.getDate()+'" data-date="' + day.toISOString() + '">' + day.getDate() + '</div>';
             var $day = td.querySelector('.day');
   
             //if today is this day
@@ -131,14 +164,15 @@ module.exports = class CallendarEvent {
             }
   
             // filter today's events
-            var todayEvents = this.getDateEvents(day);
+            day.setHours(12,0,0);
+            // var todayEvents = this.getDateEvents(day);
   
-            if (todayEvents.length && this.settings.displayEvent) {
-              $day.classList.add("has-event");
-            }
+            // if (todayEvents.length && this.settings.displayEvent) {
+            //   $day.classList.add("has-event");
+            // }
   
-            // associate some data available from the onDayCreate callback
-            $day.dataset.todayEvents = todayEvents;
+            // // associate some data available from the onDayCreate callback
+            // $day.dataset.todayEvents = todayEvents;
   
             // simplify further customization
             this.settings.onDayCreate( $day, day.getDate(), m, y );
@@ -151,18 +185,9 @@ module.exports = class CallendarEvent {
   
         body.append(thead);
         body.append(tbody);
+     
+        this.settings.onMonthChange(this,originalFirstDay, orinalLastDay, y );
         return body
-    }
-
-    getDateEvents(day) {
-      var that = this;
-      return that.settings.events.filter(function (event) {
-          console.log(new Date(event.date))
-          console.log(day)
-          console.log( that.isDayBetween(day, new Date(event.startDate), new Date(event.date)))
-          return that.isDayBetween(day, new Date(event.startDate), new Date(event.date));
-      });
-        
     }
 
     getDateEvents(day) {
@@ -175,8 +200,7 @@ module.exports = class CallendarEvent {
           // }
           //return false
           // console.log( that.isDayBetween(day, new Date(event.startDate), new Date(event.date)))
-          // return null
-          return that.isDayBetween(day, new Date(event.date), new Date(event.date));
+           return that.isDayBetween(day, new Date(event.date), new Date(event.date));
       });
         
     }
@@ -184,9 +208,8 @@ module.exports = class CallendarEvent {
     isDayBetween(d, dStart, dEnd) {
       dStart.setHours(0,0,0);
       dEnd.setHours(23,59,59,999);
-      d.setHours(12,0,0);
-
-      return dStart <= d && d <= dEnd;
+      return true
+      // return dStart <= d && d <= dEnd;
     }
 
     changeMonth(value) {
@@ -242,9 +265,8 @@ module.exports = class CallendarEvent {
         }, 50, direction);
     
         // hook 
-        this.settings.onMonthChange(this.currentDate.getMonth(), this.currentDate.getFullYear())
-    
-      
+        this.settings.onAnimationMonthChange(this.currentDate.getMonth(), this.currentDate.getFullYear())
+
     }
 
     getTransitionEndEventName() {
@@ -300,15 +322,17 @@ module.exports = class CallendarEvent {
     bindCalendarEvent() {
       var that = this
       that.element.querySelectorAll("table.new .day").forEach(day => {
+
         day.addEventListener('click', function() {
             var date = new Date(this.dataset.date);
             
-            var events = that.getDateEvents(date);
-            // if (!$(this).hasClass('disabled')) {
-            //   plugin.fillUp(e.pageX, e.pageY);
-            //   plugin.displayEvents(events);
-            // }
-            that.settings.onDateSelect(date, events);
+            var events = that.events;
+            let event = events.find(ev => {
+              return new Date(ev.date).toDateString() === date.toDateString()
+            })
+
+            that.settings.onDateSelect(that, date, event);
+           
         })
       })
     }

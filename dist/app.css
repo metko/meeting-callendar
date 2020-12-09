@@ -4,6 +4,7 @@
   text-transform: capitalize;
   text-align: center;
   font: 15px/1em inherit;
+  max-width: 100%;
   color: #545A5C; }
   .calendar a {
     text-decoration: none;
@@ -154,6 +155,7 @@
 
 .calendar .content {
   display: flex;
+  max-width: 100%;
   
 }
 .calendar .content.reverse {

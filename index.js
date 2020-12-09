@@ -1,6 +1,6 @@
 module.exports = (element, settings) => {
    const callendar = require('./src/callendar')
-   if(!element) {
+   if(!element) { 
        console.error('not a valid container')
        return 
    }
