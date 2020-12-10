@@ -13,13 +13,13 @@ module.exports = class CallendarEvent {
             disableEventDetails: false, // disable showing event details
             disableEmptyDetails: false, // disable showing empty date details
             events: [{...settings.events}], // List of event
-            onInit: function (calendar) {}, // Callback after first initialization
+            onInit: function (calendar, monthDetail) {}, // Callback after first initialization
             onAnimationMonthChange: function (month, year) {}, // Callback on month change
-            onDateSelect: function (calendar, date, events) {}, // Callback on date selection
+            onDateSelect: function (calendar, date, dayEvents) {}, // Callback on date selection
             onEventSelect: function () {},              // Callback fired when an event is selected     - see $(this).data('event')
             onEventCreate: function( $el ) {},          // Callback fired when an HTML event is created - see $(this).data('event')
             onDayCreate:   function( $el, d, m, y ) {},  // Callback fired when an HTML day is created   - see $(this).data('today'), .data('todayEvents')
-            onMonthChange: function( calendar, start, end, y ) {} // callback if you want to put some events
+            onMonthChange: function( calendar, monthDetail ) {} // callback if you want to put some events
           };
         this.settings = { ...this.defaults, ...settings} // merge des options
       
@@ -31,6 +31,7 @@ module.exports = class CallendarEvent {
       
     }
 
+    // ***************************************
     init() {
         var container = this.element;
         var todayDate = this.currentDate;
@@ -50,7 +51,7 @@ module.exports = class CallendarEvent {
         var calendarcontent = document.createElement('div')
         calendarcontent.classList.add('content')
 
-        var newCalendar = this.buildCalendar(todayDate, calendar);
+        var newCalendar = this.buildCalendar(todayDate);
         calendarcontent.append(newCalendar);
 
         calendar.append(calendarcontent)
@@ -58,9 +59,15 @@ module.exports = class CallendarEvent {
         container.append(calendar);
        
         this.bindEvents();
-        this.settings.onInit(this);
+        this.settings.onInit(this, this.getMonthDetail());
     }
+    // ***************************************
 
+    // ***************************************
+    // set event methods
+    // @params array 
+    // object must have a key date at least
+    // ***************************************
     setEvents(events) {
       var that = this
       this.events = events
@@ -72,15 +79,30 @@ module.exports = class CallendarEvent {
         }
       })
     }
+    // ***************************************
 
+
+    // ***************************************
+    // get the name of the day corresponding to the settings
+    // ***************************************
     getDayName(index) {
       return this.settings.days[index]
     }
+    // ***************************************
 
+
+    // ***************************************
+    // get the name of the month corresponding to the settings
+    // ***************************************
     getMonthName(index) {
       return this.settings.months[index]
     }
+    // ***************************************
 
+
+    // ***************************************
+    // get a full formated string date
+    // ***************************************
     fullDateString(date) {
       return {
          day: this.getDayName(date.getDay()),
@@ -89,17 +111,42 @@ module.exports = class CallendarEvent {
          d: date.getDate()
       }
     }
+    // ***************************************
+    
+    // ***************************************
+    // get tfull detail of a month, (current date, first day, last day, year)
+    // ***************************************
+    getMonthDetail() {
+      var y = this.currentDate.getFullYear(), m = this.currentDate.getMonth();
+      var firstDay = new Date(y, m, 1);
+      var lastDay = new Date(y, m + 1, 0);
+      return {
+        date: this.currentDate,
+        month: this.currentDate.getMonth(),
+        firstDay: firstDay,
+        lastDay: lastDay,
+        year:y,
+      }
+    }
+    // ***************************************
 
+
+    // ***************************************
      //Update the current month header
+     // ***************************************
     updateHeader(date, header) {
         var monthText = this.settings.months[date.getMonth()];
         monthText += this.settings.displayYear ? ' <div class="year">' + date.getFullYear() : '</div>';
         header.querySelector('.month')
         header.querySelector('.month').innerHTML = monthText;
     }
+    // ***************************************
 
+
+    // ***************************************
     //Build calendar of a month from date
-    buildCalendar(fromDate, calendar) {
+    // ***************************************
+    buildCalendar(fromDate) {
         var plugin = this;
         
         // Create the table structure
@@ -111,12 +158,11 @@ module.exports = class CallendarEvent {
         //set current year and month
         var y = fromDate.getFullYear(), m = fromDate.getMonth();
         //set first day of the month
-        var originalFirstDay = new Date(y, m, 1);
-        var firstDay = new Date(originalFirstDay);
-       
+        var firstDay = new Date(y, m, 1);
+
         //set last day of the month
-        var orinalLastDay = new Date(y, m + 1, 0);
-        var lastDay = new Date(orinalLastDay);
+        var lastDay = new Date(y, m + 1, 0);
+        
         //set  start day of weeks
         var startDayOfWeek = firstDay.getDay();
   
@@ -186,34 +232,15 @@ module.exports = class CallendarEvent {
         body.append(thead);
         body.append(tbody);
      
-        this.settings.onMonthChange(this,originalFirstDay, orinalLastDay, y );
+     
         return body
     }
+    // ***************************************
 
-    getDateEvents(day) {
-      var that = this;
-      return that.settings.events.filter(function (event) {
-          // console.log(new Date(event.date))
-          // console.log(day)
-          // if(that.isDateEquals(day, new Date(event.date))) {
-          //   return true
-          // }
-          //return false
-          // console.log( that.isDayBetween(day, new Date(event.startDate), new Date(event.date)))
-           return that.isDayBetween(day, new Date(event.date), new Date(event.date));
-      });
-        
-    }
 
-    isDayBetween(d, dStart, dEnd) {
-      dStart.setHours(0,0,0);
-      dEnd.setHours(23,59,59,999);
-      return true
-      // return dStart <= d && d <= dEnd;
-    }
-
+    // ***************************************
+    // ***************************************
     changeMonth(value) {
-      
       // if calendar is actually moving=>return
       if( ! this.isChanging) {
         this.isChanging = true
@@ -239,7 +266,7 @@ module.exports = class CallendarEvent {
       this.updateHeader(this.currentDate, this.element.querySelector('.calendar header'));
 
       // build the next month calendar
-      var newCalendar =  this.buildCalendar(this.currentDate, this.element.querySelector('.calendar'));
+      var newCalendar =  this.buildCalendar(this.currentDate);
 
       // move old and next calendar
       calendarcontent.append(newCalendar)
@@ -247,28 +274,33 @@ module.exports = class CallendarEvent {
       var that = this
 
       setTimeout(function(){ 
-              that.element.querySelector('table.old').classList.add('move', 'enter-'+direction)
-              that.element.querySelector('table.new').classList.add('move', 'enter-'+direction)
-              
-              let transitionEndEventName = that.getTransitionEndEventName();
+          that.element.querySelector('table.old').classList.add('move', 'enter-'+direction)
+          that.element.querySelector('table.new').classList.add('move', 'enter-'+direction)
+          
+          let transitionEndEventName = that.getTransitionEndEventName();
 
-              that.element.querySelector('table.new').addEventListener(transitionEndEventName, function() {
-                that.element.querySelector('table.new').classList.remove('move', 'enter-'+direction)
-              });
+          that.element.querySelector('table.new').addEventListener(transitionEndEventName, function() {
+            that.element.querySelector('table.new').classList.remove('move', 'enter-'+direction)
+          });
 
-              that.element.querySelector('table.old').addEventListener(transitionEndEventName, function() {
-                that.element.querySelector('table.old').remove()
-                calendarcontent.classList.remove('reverse')
-                that.isChanging = false
-              });
-              that.bindCalendarEvent()
+          that.element.querySelector('table.old').addEventListener(transitionEndEventName, function() {
+            that.element.querySelector('table.old').remove()
+            calendarcontent.classList.remove('reverse')
+            that.isChanging = false
+          });
+          that.bindCalendarEvent()
         }, 50, direction);
-    
         // hook 
-        this.settings.onAnimationMonthChange(this.currentDate.getMonth(), this.currentDate.getFullYear())
+
+        // this.settings.onAnimationMonthChange(this.currentDate.getMonth(), this.currentDate.getFullYear())
+    
+        this.settings.onMonthChange(this, this.getMonthDetail());
 
     }
 
+
+    // ***************************************
+    // ***************************************
     getTransitionEndEventName() {
       var transitions = {
           "transition"      : "transitionend",
@@ -284,8 +316,22 @@ module.exports = class CallendarEvent {
       }
     }
 
+    // ***************************************
+    // ***************************************
+    isDayBetween(d, dStart, dEnd) {
+      dStart.setHours(0,0,0);
+      dEnd.setHours(23,59,59,999);
+      return true
+      // return dStart <= d && d <= dEnd;
+    }
+
+
+    // ***************************************
+    // ***************************************
     bindEvents() {
+
       var that = this
+
       //Click previous month
       that.element.querySelector(".btn-prev").addEventListener('click', function ( e ) {
           console.log('previous month')
@@ -294,7 +340,6 @@ module.exports = class CallendarEvent {
       });
 
       //Click next month
-    
       that.element.querySelector(".btn-next").addEventListener('click', function ( e ) {
           console.log('next month')
           that.changeMonth(1)
@@ -302,40 +347,48 @@ module.exports = class CallendarEvent {
       });
       
       this.bindCalendarEvent()
-      //Binding day event
-      
-          // var date = new Date($(this).data('date'));
-          // var events = plugin.getDateEvents(date);
-          // if (!$(this).hasClass('disabled')) {
-          // plugin.fillUp(e.pageX, e.pageY);
-          // plugin.displayEvents(events);
-          // }
-          // plugin.settings.onDateSelect(date, events);
-    
-
-      // //Binding event container close
-      // $(plugin.element).on('click', '.event-container .close', function (e) {
-      //     plugin.empty(e.pageX, e.pageY);
-      // });
+ 
     }
 
+
+    // ***************************************
+    // ***************************************
     bindCalendarEvent() {
+
       var that = this
+
       that.element.querySelectorAll("table.new .day").forEach(day => {
 
         day.addEventListener('click', function() {
-            var date = new Date(this.dataset.date);
-            
-            var events = that.events;
-            let event = events.find(ev => {
-              return new Date(ev.date).toDateString() === date.toDateString()
-            })
-
-            that.settings.onDateSelect(that, date, event);
-           
+           that.resetSelectedDay()
+           day.classList.add('selected')
+           that.checkDayEvents(new Date(day.dataset.date))
         })
+
       })
     }
+    
+    // ***************************************
+    // ***************************************
+    // click on a day, select it and check for events details
+    checkDayEvents(date) {
+        var dayEvents = this.events.find(ev => {
+          return new Date(ev.date).toDateString() === date.toDateString()
+        })
+        this.settings.onDateSelect(this, date, dayEvents);
+    }
+
+
+    // ***************************************
+    // ***************************************
+    resetSelectedDay() {
+      var that = this
+      that.element.querySelectorAll("table.new .day").forEach(day => {
+          day.classList.remove('selected')
+      })
+    }
+
+
 }
 
 

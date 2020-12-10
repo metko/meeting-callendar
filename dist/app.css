@@ -70,7 +70,7 @@
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer; }
-    .calendar .day:hover {
+    .calendar .day:hover, .calendar .day.selected  {
       border: 2px solid #6691CC; }
     .calendar .day.today {
       background: #6691CC;
@@ -80,7 +80,8 @@
     .calendar .day.wrong-month {
       color: #CBD1D2; }
     .calendar .day.wrong-month:hover {
-      border: 2px solid transparent; }
+      /* border: 2px solid transparent;  */
+    }
     .calendar .day.has-event:after {
       content: '';
       position: absolute;
