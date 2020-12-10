@@ -23,7 +23,7 @@ const query = async (context) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      "x-hasura-admin-secret": "ffme2020*"
+      "x-hasura-admin-secret": ""
     },
     body: JSON.stringify(context)
   })
