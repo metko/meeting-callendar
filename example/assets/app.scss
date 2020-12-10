@@ -1,0 +1,110 @@
+@import "~@metko/meeting-calendar/dist/app.css";
+  
+body {
+    background: #F9F9F9 none repeat scroll 0% 0%;
+    color: #0E171C;
+    font: 300 100%/1.5em "Lato",sans-serif;
+    margin: 0px;
+}
+
+.title{
+    text-align: center;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.callendar-container{
+    width: 100%;
+    position: relative;
+    margin: 50px;
+    max-width: 500px;
+}
+.event-container{
+    position: relative;
+    margin: 50px;
+    max-width: 500px;
+    width: 100%;
+    height: 100px;
+
+    h2, .selected-day {
+        text-align: center;
+    }
+
+    .block {
+        display: flex;
+        width: 100%;
+        
+        .block-content {
+            pointer-events: none;
+            border: 1px solid rgb(0, 162, 255);
+            padding: 0px 10px;
+            height: 60px;
+            color: rgb(0, 162, 255);
+            vertical-align: middle;
+            margin: 10px 0;
+            border-width: 1px;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            
+            &.selected {
+                width: 50%
+            }
+        }
+
+        .btn-event {
+            border: 1px solid rgb(0, 162, 255);
+            padding: 0px 10px;
+            height: 60px;
+            color: rgb(0, 162, 255);
+            vertical-align: middle;
+            margin: 10px 0;
+            border-width: 1px;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+        }
+
+
+        &.has-event {
+            .block-content {
+                background : rgb(0, 162, 255);
+                color: #fff;
+            }
+        }
+     
+
+        .time {
+            pointer-events: none;
+            text-align: center;
+        }
+        .title {
+            pointer-events: none;
+
+            text-align: center;
+        }
+        &:not(.has-event):hover {
+            border-width: 2px;
+            cursor: pointer;
+        }
+    }
+}
+
