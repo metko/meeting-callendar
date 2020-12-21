@@ -274,13 +274,13 @@ module.exports = class CallendarEvent {
       var that = this
 
       setTimeout(function(){ 
-          that.element.querySelector('table.old').classList.add('move', 'enter-'+direction)
-          that.element.querySelector('table.new').classList.add('move', 'enter-'+direction)
+          that.element.querySelector('table.old').classList.add('is-animating', 'enter-'+direction)
+          that.element.querySelector('table.new').classList.add('is-animating', 'enter-'+direction)
           
           let transitionEndEventName = that.getTransitionEndEventName();
 
           that.element.querySelector('table.new').addEventListener(transitionEndEventName, function() {
-            that.element.querySelector('table.new').classList.remove('move', 'enter-'+direction)
+            that.element.querySelector('table.new').classList.remove('is-animating', 'enter-'+direction)
           });
 
           that.element.querySelector('table.old').addEventListener(transitionEndEventName, function() {

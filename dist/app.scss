@@ -1,0 +1,206 @@
+// ***************************************
+// Global settings
+// ***************************************
+$calendar-event-text-color: #7c7c7c!default;
+$calendar-event-text-color-dark: #575757!default;
+$calendar-event-disabled-color: #CBD1D2!default;
+$calendar-event-primary-color: #6691CC!default;
+$calendar-event-font-size: 15px/1em inherit!default;
+
+// ***************************************
+// Header button
+// ***************************************
+$calendar-event-btn-color-hover: #fff!default;
+$calendar-event-btn-border-width:2px!default;
+$calendar-event-arrow-border-width:2px!default;
+
+// ***************************************
+// Table calendar settings
+// ***************************************
+$calendar-event-table-margin: 20px 0!default;
+$calendar-event-table-head-font-size: 1.2em!default;
+$calendar-event-table-head-font-weight: 600!default;
+$calendar-event-table-td-padding: .8em .1em!default;
+$calendar-event-day-width: 2.5em!default;
+$calendar-event-day-height: 2.5em!default;
+$calendar-event-day-border: 1.5px solid transparent!default;
+
+
+// ***************************************
+// Animations
+// ***************************************
+$calendar-event-animation-duration: .5s!default;
+
+
+.calendar {
+
+    position: relative;
+    overflow: hidden;
+    text-transform: capitalize;
+    text-align: center;
+    font: $calendar-event-font-size;
+    max-width: 100%;
+    color: $calendar-event-text-color; 
+
+    a {
+        text-decoration: none;
+        color: inherit; 
+    }
+
+    header {
+        
+        .simple-calendar-btn {
+            display: inline-block;
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            color: $calendar-event-text-color;
+            border-radius: 50%;
+            opacity: .6;
+            border: $calendar-event-btn-border-width solid $calendar-event-text-color; 
+
+            &:hover {
+                background: $calendar-event-text-color;
+                color: $calendar-event-btn-color-hover; 
+                opacity: 1;
+            }
+
+            &:before {
+                content: '';
+                position: absolute;
+                top: 9px;
+                left: 8px;
+                width: 8px;
+                height: 8px;
+                border-style: solid;
+                border-width: $calendar-event-arrow-border-width $calendar-event-arrow-border-width 0 0;
+                transform: rotate(45deg);
+                transform-origin: center center; 
+            }
+    
+        }
+
+        .btn-prev {
+            top: 0;
+            left: 0;
+            transform: rotate(-180deg); 
+        }
+
+        .btn-next {
+            top: 0;
+            right: 0; 
+
+            &:before {
+                transform: rotate(45deg); 
+            }
+        }
+
+        .month {
+            color: $calendar-event-text-color-dark;
+            padding: 0;
+            margin: 0; 
+            
+            .year {
+                font-size: 0.6em;
+                font-weight: 100; 
+            }
+
+        }
+    
+    }
+
+    .content {
+        display: flex;
+        max-width: 100%;
+
+        &.reverse {
+            flex-flow: row-reverse;
+        }
+
+        .is-animating {
+            transition: all $calendar-event-animation-duration ease;
+        }
+          
+        .enter-right-to-left {
+            transform: translateX(-100%);
+        }
+        .enter-left-to-right {
+            transform: translateX(100%);
+        }
+
+    }
+    
+    table {
+        width: 100%;
+        margin: $calendar-event-table-margin;
+        border-spacing: 0px; 
+    }
+
+    thead {
+        font-size: $calendar-event-table-head-font-size;
+        font-weight: $calendar-event-table-head-font-weight; 
+        color: $calendar-event-text-color-dark;
+    }
+
+    td {
+        padding: $calendar-event-table-td-padding; 
+    }
+
+    .day {
+        position: relative;
+        display: inline-block;
+        width: $calendar-event-day-width;
+        height: $calendar-event-day-height;
+        line-height: $calendar-event-day-height;
+        border-radius: 50%;
+        border: $calendar-event-day-border;
+        cursor: pointer; 
+
+        &:hover{
+            border-color: $calendar-event-primary-color; 
+        }
+        &.selected {
+            border-color: $calendar-event-primary-color; 
+        }
+
+        &.today {
+            background: $calendar-event-primary-color;
+            color: white;
+
+            &.has-event:after {
+                background: white; 
+            }
+
+        }
+
+        &.wrong-month {
+            color: $calendar-event-disabled-color; 
+            &:hover {
+                border-color: $calendar-event-disabled-color;  
+            }
+        }
+
+        &.has-event:after {
+            content: '';
+            position: absolute;
+            top: calc(50% + .6em);
+            left: calc(50% - 2px);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: $calendar-event-primary-color;
+        }
+
+        &.disabled {
+            cursor: default; 
+            &:hover {
+                border: 2px solid transparent;
+            }
+        }
+        
+    }
+
+}
+
