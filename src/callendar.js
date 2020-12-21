@@ -3,10 +3,12 @@
 module.exports = class CallendarEvent {
 
     constructor(element, settings) {
+      console.log(settings)
         this.defaults = {
             months: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre'], //string of months starting from january
             days: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], //string of days starting from sunday
             times: ['10:00', "10:30", "11:00", "11:30", "12:00"],
+            dateRange: settings.dateRange ? settings.dateRange : [],
             displayYear: true, // display year in header
             fixedStartDay: true, // Week begin always by monday or by day set by number 0 = sunday, 7 = saturday, false = month always begin by first day of the month
             displayEvent: true, // display existing event
@@ -208,18 +210,17 @@ module.exports = class CallendarEvent {
             if (day.getMonth() != fromDate.getMonth()) {
               $day.classList.add("wrong-month");
             }
-  
+            
+           // Check if it's between date range
+           if( this.settings.dateRange.length &&  ! this.isInDateRange(day) ) {
+              $day.classList.add("disabled");
+            }
+
             // filter today's events
             day.setHours(12,0,0);
             // var todayEvents = this.getDateEvents(day);
   
-            // if (todayEvents.length && this.settings.displayEvent) {
-            //   $day.classList.add("has-event");
-            // }
-  
-            // // associate some data available from the onDayCreate callback
-            // $day.dataset.todayEvents = todayEvents;
-  
+              
             // simplify further customization
             this.settings.onDayCreate( $day, day.getDate(), m, y );
   
@@ -236,7 +237,24 @@ module.exports = class CallendarEvent {
         return body
     }
     // ***************************************
+    
+    
+    // ***************************************
+    // ***************************************
+    isInDateRange(date) {
 
+      var inRange = false
+
+      this.settings.dateRange.forEach(range => {
+        if(date > range.start && date < range.end ) {
+          inRange = true
+        }
+      })
+
+      return inRange
+    
+    }
+    // ***************************************
 
     // ***************************************
     // ***************************************
@@ -360,6 +378,11 @@ module.exports = class CallendarEvent {
       that.element.querySelectorAll("table.new .day").forEach(day => {
 
         day.addEventListener('click', function() {
+
+          if( that.settings.dateRange.length &&  ! that.isInDateRange(new Date(day.dataset.date)) ) {
+            return
+          }
+          
            that.resetSelectedDay()
            day.classList.add('selected')
            that.checkDayEvents(new Date(day.dataset.date))
