@@ -196,7 +196,7 @@ $calendar-event-animation-duration: .5s!default;
         &.disabled {
             cursor: default; 
             &:hover {
-                border: 2px solid transparent;
+                border-color: transparent;
             }
         }
         
